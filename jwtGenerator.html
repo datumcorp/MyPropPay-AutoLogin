@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <title>Test</title>
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="stylesheet" media="all" href="vendors/bootstrap/bootstrap.css">
+    <link rel="stylesheet" media="all" href="vendors/bootstrap/paper.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+          <h1>JWT Generator <br/><small>Build Claim and generate JWT for PropPay Auto Login </small></h1>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <form class="form-horizontal">
+                  <div class="form-group">
+                    <label for="prvpem" class="col-sm-2 control-label">Private key</label>
+                    <div class="col-sm-10">
+                      <!-- <input type="text" class="form-control" id="url" name="url" placeholder="MFS Url"> -->
+                      <textarea rows="5" class="form-control" name="prvpem" id="prvpem"></textarea>
+                    </div>
+                  </div> 
+                  <div class="form-group">
+                    <label for="appid" class="col-sm-2 control-label">AppID</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" id="appid" name="appid" placeholder="AppID">
+                      <small>22255cc3-27ae-4ed3-b6f8-371b6ed51fce</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="email" class="col-sm-2 control-label">Email</label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" id="email" name="email" placeholder="example@example.com">
+                      <small>user email</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="email" class="col-sm-2 control-label">Valid for </label>
+                    <div class="col-sm-10">
+                      <input type="number" class="form-control" id="days" name="days" placeholder="30" min="1" max="366">
+                      <small>Valid for how many days</small>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="getclaim" class="btn btn-default">Generate Claim</button> <button id="clearclaim" class="btn btn-default">Clear</button>
+                      
+                    </div>
+
+                  </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                  <div class="panel-heading">Header</div>
+                  <div class="panel-body">
+                    <pre id="header"></pre>
+                  </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-success">
+                  <div class="panel-heading">Claim</div>
+                  <div class="panel-body">
+                    <pre id="claim"></pre>
+                  </div>
+                </div>
+            </div>
+        </div>  
+        <div class="row">
+            <div class="col-md-6" style="margin-bottom: 15px;">
+                <button id="genjwt" class="btn btn-default">Generate JWT</button>
+            </div>
+        </div>  
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                  <div class="panel-heading">JWT</div>
+                  <div class="panel-body">
+                    <pre id="jwt" style="white-space: pre-wrap;"></pre>
+                  </div>
+                </div>
+            </div>
+        </div>  
+        <div class="row">
+            <div class="col-md-10">
+                <form class="form-horizontal">
+                  <div class="form-group">
+                    <label for="vsecret" class="col-sm-2 control-label">Verifying Secret</label>
+                    <div class="col-sm-10">
+                      <!-- <input type="text" class="form-control" id="vsecret" name="vsecret" placeholder="Secret"> -->
+                      <textarea rows="3" class="form-control" name="pubpem" id="pubpem"></textarea>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-2">
+                      <button id="verifyjwt" class="btn btn-default">Verify JWT</button>
+                    </div>
+                    <div class="col-sm-4">
+                      <span id="valid"></span>
+                    </div>
+                  </div>
+                </form>
+            </div>
+            
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+              
+          </div>
+        </div>          
+    </div>
+
+    
+    <script src="vendors/jquery-2.2.3.min.js"></script>
+    <script src="vendors/bootstrap/bootstrap.min.js"></script>
+    <script src="vendors/moment.min.js"></script>
+    <script src="vendors/jsrsasign-7.1.1.js"></script>
+    <script src="jwtlib.browser.js"></script>
+    <script>
+        $(function(){
+            var iss = "propfit";
+            var prvpem = window.localStorage.proppay_jwtgen_prvpem;
+            var pubpem = window.localStorage.proppay_jwtgen_pubpem;
+            var appid = window.localStorage.proppay_jwtgen_appid;
+            var email = window.localStorage.proppay_jwtgen_email;
+            var days = window.localStorage.proppay_jwtgen_days;
+
+            var prvpemEl = $('#prvpem');
+            var pubpemEl = $('#pubpem');
+            var appidEl = $('#appid');
+            var emailEl = $('#email');
+            var daysEl = $('#days');
+
+            var nbf = window.localStorage.proppay_jwtgen_nbf;
+            var iat = window.localStorage.proppay_jwtgen_iat;
+            var exp = window.localStorage.proppay_jwtgen_exp;
+
+            var claim = JSON.parse(window.localStorage.proppay_jwtgen_claim || "{}");
+            var header = JSON.parse(window.localStorage.proppay_jwtgen_header || '{"alg": "RS256", "typ": "JWT"}');
+            var jwt = window.localStorage.proppay_jwtgen_jwt;
+
+            var init = function(){
+                /*if(mfsurl){ $('#url').val(mfsurl); };
+                if(apiclientsecret){ $('#apiclientsecret').val(apiclientsecret); };
+                if(claim){ $('#claim').text(JSON.stringify(claim,null,2)); };
+                if(header){ $('#header').text(JSON.stringify(header,null,2)); };
+                if(jwt){ $('#jwt').text(jwt); };*/
+                if(prvpem) { prvpemEl.val(prvpem); }
+                if(pubpem) { pubpemEl.val(prvpem); }
+                if(appid) { appidEl.val(appid); }
+                if(email) { emailEl.val(email); }
+                if(days) { daysEl.val(days); }
+
+                if(claim){ $('#claim').text(JSON.stringify(claim,null,2)); };
+                if(header){ $('#header').text(JSON.stringify(header,null,2)); };
+                if(jwt){ $('#jwt').text(jwt); };
+            }
+            var genClaim = function(){
+                //claim.iss = iss;
+                days = $('#days').val();
+                window.localStorage.proppay_jwtgen_prvpem = prvpemEl.val();
+                window.localStorage.proppay_jwtgen_appid = appidEl.val();
+                window.localStorage.proppay_jwtgen_email = emailEl.val();
+                window.localStorage.proppay_jwtgen_days = daysEl.val();
+                var now = moment();
+                var expdt = moment().add(days,'days'); 
+                var expdtstr = expdt.toISOString();
+                var tNow = now.unix();
+                var tEnd = expdt.unix();
+                //claim.nbf = tNow;
+                //claim.iat = tNow;
+                claim.exp = tEnd;
+                //claim.jti = Math.random().toString(16).substring(7) + Math.random().toString(16).substring(7);
+                claim.email = emailEl.val()
+                claim.appid = appidEl.val()
+
+                var header = JSON.parse('{"alg": "RS256", "typ": "JWT"}');
+
+                window.localStorage.proppay_jwtgen_claim = JSON.stringify(claim);
+                window.localStorage.proppay_jwtgen_header = JSON.stringify(header);
+
+                $('#claim').text(JSON.stringify(claim,null,2))
+                $('#header').text(JSON.stringify(header,null,2))
+            }
+            $('#getclaim').on('click',function(e){
+                e.preventDefault();
+
+                if(appidEl.val() && emailEl.val()){
+                    genClaim();
+                }else{
+                    alert('no appid and/or email')
+                }
+
+                
+            })
+            $('#clearclaim').on('click',function(e){
+                e.preventDefault();
+                window.localStorage.proppay_jwtgen_claim = "";
+                window.localStorage.proppay_jwtgen_header = "";
+                window.localStorage.proppay_jwtgen_jwt = "";
+                $('#claim').text("")
+                $('#header').text("")
+                $('#jwt').text("");
+            })
+
+            $('#genjwt').on('click',function(e){
+                e.preventDefault();
+
+                prvpem = $('#prvpem').val();
+                if(prvpem){
+                    var opts = {claim: claim, header: header, prvpem: prvpem}
+                    window.generateJWT(opts,function(err,jwtres){
+                        if(jwtres){
+                            jwt = jwtres;
+                            $('#jwt').text(jwt);
+                            window.localStorage.proppay_jwtgen_jwt = jwt;
+                        }
+                    })
+                }
+
+                
+            })
+            $('#verifyjwt').on('click',function(e){
+                e.preventDefault();
+                pubpem = $('#pubpem').val() || "";
+                window.localStorage.proppay_jwtgen_pubpem = pubpem;
+                if(pubpem){
+                    window.validateJWT({pubpem: pubpem, jwt: jwt}, function(err,isValid){
+                        if( isValid){
+                            $('#valid').html("Valid!!");
+                        }else{
+                            $('#valid').html("Invalid!!");
+                        }
+                    })
+                }
+            });
+
+            init();
+        })
+    </script>
+</body>
+
+</html>
