@@ -57,9 +57,13 @@ eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTMyNzQ0NzAsImVtYWlsIjoicGhzMDg
 
 #### Assign a token for a user
 
-* Use jwt to assign a login token for user with the email used to created the jwt.
-* Refer to API listing below call the end point to assign an auto login token to a user
-* Calling this endpoint will return a link which when used will automatically logged in for the assigned user.
+1. Enable auto login for user (identified by email address) by obtaining the login token. 
+  * Call PropPay endpoint [POST] /api/user/login?type=auto along with user email, propertyID and jwt
+  * Refer to API listing below for more details
+2. Pass the link containing the token to intended client
+3. Client initiates auto login by calling the link containing the login token 
+
+![proppay-autologin](proppay-autologin.png)
 
 ## PropPay API 
 
