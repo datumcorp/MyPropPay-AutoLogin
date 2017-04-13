@@ -2,6 +2,9 @@
 
 Procedure to assign an autologin url to a user
 
+Note:
+* To make full use of the steps outlined here, make sure you have an understanding of how to generate and use jwt ([JSON Web Token](https://jwt.io/))
+
 ## Usage
 
 #### Generate a jwt (JSON Web Token)
