@@ -46,7 +46,7 @@ eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0OTMyNzQ0NzAsImVtYWlsIjoicGhzMDg
 assign auto login token
 
 #### Sample URL
-http://proppay.com:3000/api/user/login?type=auto
+http://app.myproppay.com/api/user/login?type=auto
 
 #### Headers
 
@@ -78,7 +78,7 @@ Content-Type: application/json; charset=utf-8
 {
   "ok": true,
   "data": {
-    "link": "http://proppay.com:3000/api/user/login/aaa@email.com?token=123abc&appid=xxx-xxx-xxx",
+    "link": "http://app.myproppay.com/api/user/login/aaa@email.com?token=123abc&appid=xxx-xxx-xxx",
     "token": "123abc"
   }
 }
