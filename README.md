@@ -1,4 +1,4 @@
-﻿# MyPropPay Auto Login
+# MyPropPay Auto Login
 
 Procedure to assign an autologin url to a user
 
@@ -55,7 +55,8 @@ __*Required*__
 
 * email - email of the user to assign the login token
 * appid - appid jwt is assign to
-* jwt - JSON Web token 
+* jwt - JSON Web token (deprecated)
+* token - Generated from PropPay
 
 __*Optional*__
 
@@ -95,5 +96,4 @@ Content-Type: application/json; charset=utf-8
     "ErrorCode": 401
 }
 ```
-
 
